@@ -1,232 +1,218 @@
-# 🚀 Complete Beginner's Guide: Running Proxy Server on IntelliJ
+# 🚀 Beginner's Guide: Running the Proxy Server on IntelliJ IDEA
 
-**NOTE:** This is a **pure Java project** (NOT Spring Boot). No frameworks needed—just Java!
-
----
-
-## 📋 Prerequisites (Before You Start)
-
-Before downloading anything, make sure you have:
-
-1. **Java 17 or higher** installed
-   - Check: Open Command Prompt/Terminal, type: `java -version`
-   - Should show: `java version "17"` or higher
-   - If not installed: Download from [java.com](https://www.oracle.com/java/technologies/downloads/)
-
-2. **IntelliJ IDEA** (Community Edition is FREE)
-   - Download from: [jetbrains.com/idea](https://www.jetbrains.com/idea/download/)
-   - Install it (next → next → finish)
-
-3. **Terminal/Command Prompt** (built-in on your OS)
-   - Windows: Search "Command Prompt" or "PowerShell"
-   - Mac/Linux: Search "Terminal"
+> **Note:** This is a **pure Java project**, not built with Spring Boot or any framework — only Java is required.
 
 ---
 
-## 📥 Step 1: Download the Project
+## 📥 Step 1: Get the Project
 
-### Option A: Download ZIP (Easiest for Beginners)
+### Option A — Download as ZIP (Recommended for Beginners)
 
-1. In v0, click **three dots (⋮)** in top right → **Download ZIP**
-2. Wait for download to complete
-3. **Extract/Unzip** the folder
-   - Right-click → "Extract All" (Windows)
-   - Double-click (Mac)
-4. Note down where you extracted it (e.g., `C:\Users\YourName\Downloads\webserver-main`)
+1. Click the **three dots (⋮)** on the repository page → choose **Download ZIP**
+2. Wait for the download to finish
+3. **Extract (unzip)** the folder
+    - On Windows: Right-click → *Extract All*
+    - On macOS: Just double-click
+4. Remember where you extracted it, e.g.  
+   `C:\Users\YourName\Downloads\webserver-main`
 
-### Option B: Using Git (Advanced)
+### Option B — Clone Using Git
 
-\`\`\`bash
+```bash
+
 git clone <your-repo-url>
 cd server/java
-\`\`\`
+```
 
 ---
 
-## 🎯 Step 2: Open Project in IntelliJ
+## 🎯 Step 2: Open the Project in IntelliJ IDEA
 
-1. **Open IntelliJ IDEA**
-2. Click **File** → **Open**
-3. Navigate to the extracted folder → **server/java** subfolder
+1. Launch **IntelliJ IDEA**
+2. Go to **File → Open**
+3. Navigate to the extracted folder → open the **server/java** subfolder
 4. Click **Open** (or **Open as Project**)
-5. Wait 30 seconds for IntelliJ to load and index files
+5. Wait a few moments while IntelliJ indexes the files
 
 ---
 
-## ⚙️ Step 3: Configure Java (Newbie-Proof)
+## ⚙️ Step 3: Configure the Java SDK
 
-This step prevents "Java not found" errors.
+This step ensures IntelliJ uses the correct JDK version.
 
-1. **Top Menu** → **File** → **Project Structure**
-2. On left panel, click **Project**
-3. Under "Project SDK", click the dropdown
-4. Select **Java 17** (if available)
-   - If not listed: Click **Add SDK** → **Download JDK**
-   - Choose version **17** or higher
-   - Click **Download**
-   - Wait for download to complete
-5. Click **Apply** → **OK**
+1. Go to **File → Project Structure**
+2. Select **Project** on the left sidebar
+3. Under **Project SDK**, open the dropdown
+4. Choose **Java 17** (or newer)
 
-✅ **IntelliJ will now use the correct Java version**
+    * If it’s not available, click **Add SDK → Download JDK**
+    * Select version **17 or higher** and download it
+5. Click **Apply → OK**
+
+✅ Now IntelliJ is set up to run the project correctly.
 
 ---
 
-## 🔍 Step 4: Verify Project Structure
+## 🔍 Step 4: Check Your Project Structure
 
-The left panel should show:
+Your folder view should look like this:
 
-\`\`\`
+```
 ProxyServer
 ├── src/
 │   └── com/example/proxy/
-│       ├── ProxyServer.java         ← MAIN FILE
+│       ├── ProxyServer.java        ← Main file
 │       ├── ProxyHandler.java
 │       ├── ProxyCache.java
 │       ├── HttpProxyRequest.java
 │       └── ProxyMetrics.java
 ├── .idea/
 └── ProxyServer.iml
-\`\`\`
+```
 
-If you don't see files, right-click the folder → **Mark Directory as** → **Sources Root**
+If files don’t appear under **src**, right-click the folder → **Mark Directory as → Sources Root**.
 
 ---
 
-## ▶️ Step 5: Run the Proxy Server (THE BIG MOMENT!)
+## ▶️ Step 5: Run the Proxy Server
 
-### Method 1: Click to Run (Easiest)
+### Method 1 — Quick Run
 
-1. In left panel, navigate to: **src/com/example/proxy/ProxyServer.java**
-2. Right-click on **ProxyServer.java**
-3. Select **Run 'ProxyServer.main()'**
-4. Wait 3-5 seconds...
+1. Open **src/com/example/proxy/ProxyServer.java**
+2. Right-click the file → select **Run 'ProxyServer.main()'**
+3. Wait a few seconds...
 
-**You should see in the bottom terminal:**
-\`\`\`
+If successful, you’ll see:
+
+```
 ProxyServer started on port 9090
 Listening for incoming connections...
-\`\`\`
+```
 
-✅ **SUCCESS! Server is running!**
+✅ Your proxy server is now running!
 
-### Method 2: Using Run Configuration (If Method 1 doesn't work)
+### Method 2 — Run Configuration (if the above doesn’t work)
 
-1. **Top Menu** → **Run** → **Edit Configurations**
-2. Click **+** → **Application**
-3. Fill in:
-   - **Name:** ProxyServer
-   - **Main class:** com.example.proxy.ProxyServer
-   - **Working directory:** (leave default)
-4. Click **Apply** → **OK**
-5. Click the green **Run** button (or press Shift+F10)
+1. Go to **Run → Edit Configurations**
+2. Click the **+** icon → choose **Application**
+3. Fill in the following:
+
+    * **Name:** ProxyServer
+    * **Main class:** com.example.proxy.ProxyServer
+    * **Working directory:** leave as default
+
+4. Click **Apply → OK**
+5. Press the green **Run** button (or hit `Shift + F10`)
 
 ---
 
-## 🧪 Step 6: Test If It's Working
+## 🧪 Step 6: Test the Proxy Server
 
-Open a **new Terminal/Command Prompt** and run:
+Open a new **Terminal** or **Command Prompt**, and try these:
 
-\`\`\`bash
-# Test 1: Check if server is running
+```bash
+# Test if the server is running
 curl -v http://localhost:9090/
 
-# Test 2: Forward a request through the proxy
+# Send a request through the proxy
 curl -v -x http://localhost:9090 http://www.example.com/
 
-# Test 3: Check cache hit
+# Test caching (second request should be faster)
 curl -v -x http://localhost:9090 http://www.example.com/
-# (Should be faster the second time!)
-\`\`\`
+```
 
-**Expected output:** You'll see response headers and HTML content
+You should see response headers and HTML output from the requested site.
 
 ---
 
 ## 🛑 Step 7: Stop the Server
 
 In IntelliJ:
-- Click the **red square** (⏹) button in the bottom toolbar
-- Or press **Ctrl+C** in the terminal
+
+* Click the **red square (⏹)** in the bottom toolbar  
+  **OR**
+* Press **Ctrl + C** if running in a terminal
 
 ---
 
-## 🚨 Common Beginner Errors & Fixes
+## 🚨 Common Issues & Fixes
 
-### ❌ Error: "Cannot find symbol 'ProxyServer'"
-
-**Fix:** 
-- Right-click **src** folder → **Mark Directory as** → **Sources Root**
-- Then **Build** → **Rebuild Project**
-
-### ❌ Error: "Java 17 not found"
+### ❌ “Cannot find symbol 'ProxyServer'”
 
 **Fix:**
-- Go to **File** → **Project Structure**
-- Under Project SDK, click **Add SDK** → **Download JDK**
-- Select **17** and download
-- Apply changes
 
-### ❌ Error: "Port 9090 already in use"
+* Right-click the **src** folder → **Mark Directory as → Sources Root**
+* Then go to **Build → Rebuild Project**
+
+---
+
+### ❌ “Java 17 not found”
 
 **Fix:**
-- Open **ProxyServer.java**
-- Find: `private static final int PORT = 9090;`
-- Change to: `private static final int PORT = 9999;`
-- Save and run again
 
-### ❌ Error: "Connection refused when testing"
+* Go to **File → Project Structure**
+* Under **Project SDK**, click **Add SDK → Download JDK**
+* Choose **Java 17**, then apply changes
+
+---
+
+### ❌ “Port 9090 already in use”
 
 **Fix:**
-- Make sure the green run button completed (check console)
-- Wait 5 seconds before testing
-- Make sure you see "Listening for incoming connections..." message
+
+* Open `ProxyServer.java`
+* Find this line:
+  `private static final int PORT = 9090;`
+* Change it to another number, e.g. `9999`
+* Save and run again
 
 ---
 
-## 📊 Understanding the Project
+### ❌ “Connection refused” during testing
 
-This proxy server:
-- **Listens on port 9090** for client connections
-- **Forwards HTTP requests** to any upstream server
-- **Caches responses** (60% faster on repeated requests!)
-- **Handles 100+ concurrent requests** using thread pool
-- **Logs performance metrics** to track speed & cache hits
+**Fix:**
 
----
-
-## 🎓 Next Steps After It's Running
-
-1. **View Logs:** Watch the console while testing—you'll see cache hits!
-2. **Modify Configuration:** Open ProxyServer.java and change:
-   - `PORT` (line with 9090)
-   - `THREAD_POOL_SIZE` (default 100)
-   - `CACHE_SIZE` (default 1000)
-3. **Create Test Clients:** Write Java code to stress-test the proxy
-4. **Monitor Performance:** Check ProxyMetrics for throughput and latency
+* Make sure the run console says “Listening for incoming connections…”
+* Wait a few seconds before sending requests
+* Ensure the proxy is running on the correct port
 
 ---
 
-## ✅ Verification Checklist
+## 📊 What This Project Does
 
-- [ ] Java 17+ installed
-- [ ] IntelliJ downloaded & installed
-- [ ] Project extracted
-- [ ] Project opened in IntelliJ
-- [ ] Project SDK set to Java 17+
-- [ ] ProxyServer.java runs without errors
-- [ ] Console shows "Listening for incoming connections..."
-- [ ] `curl http://localhost:9090/` returns a response
+This Proxy Server:
 
-**If all checked ✅ → You're done!**
+* Listens for client connections on **port 9090**
+* Forwards HTTP requests to external servers
+* Uses **caching** to speed up repeat requests
+* Handles **multiple concurrent requests** with a thread pool
+* Tracks and logs performance using **ProxyMetrics**
 
 ---
 
-## 💬 Need Help?
+## 🎓 What to Try Next
 
-If you hit an issue:
-1. Check the error message in IntelliJ console
-2. Check this guide's "Common Errors" section
-3. Google the exact error message
-4. Ask in Java communities (Stack Overflow, Reddit r/java)
+* **View Logs:** Watch IntelliJ’s console to see cache hits and responses
+* **Tweak Settings:** Edit `ProxyServer.java` to change:
+    * Port (`PORT`)
+    * Thread pool size (`THREAD_POOL_SIZE`)
+    * Cache limit (`CACHE_SIZE`)
+* **Performance Testing:** Write your own client script to stress-test the proxy
+* **Monitor Metrics:** Use `ProxyMetrics` to analyze performance trends
 
-**Happy coding! 🎉**
+---
+
+## ✅ Final Checklist
+
+* [ ] Java 17+ installed
+* [ ] IntelliJ IDEA installed
+* [ ] Project extracted or cloned
+* [ ] SDK configured in IntelliJ
+* [ ] `ProxyServer.java` runs without errors
+* [ ] Console shows “Listening for incoming connections…”
+* [ ] `curl http://localhost:9090/` gives a valid response
+
+✅ If everything checks out, your Proxy Server is ready!
+
+---
+**Happy Coding! 🎉**
