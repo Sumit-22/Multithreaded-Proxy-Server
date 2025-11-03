@@ -2,13 +2,16 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+// Load fonts
+const geist = Geist({ subsets: ['latin'] })
+const geistMono = Geist_Mono({ subsets: ['latin'] })
 
+// Project metadata — replace with your own app info
 export const metadata: Metadata = {
-    title: 'v0 App',
-    description: 'Created with v0',
-    generator: 'v0.app',
+    title: 'Web Server Dashboard',
+    description: 'Landing page for the Java-based multithreaded HTTP server project.',
+    authors: [{ name: 'Sumit Kumar' }],
+    applicationName: 'WebServerUI',
 }
 
 export default function RootLayout({
@@ -18,7 +21,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-        <body className={`font-sans antialiased`}>
+        <body className={`${geist.className} ${geistMono.className} font-sans antialiased`}>
         {children}
         </body>
         </html>
