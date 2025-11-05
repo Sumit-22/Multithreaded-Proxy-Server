@@ -6,7 +6,7 @@
 
 ## 📥 Step 1: Get the Project
 
-### Option A — Download as ZIP (Recommended for Beginners)
+### Option A — Download as ZIP
 
 1. Click the **three dots (⋮)** on the repository page → choose **Download ZIP**
 2. Wait for the download to finish

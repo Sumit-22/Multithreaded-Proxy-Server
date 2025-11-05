@@ -2,7 +2,7 @@
 
 A high-performance proxy server built in Java with ExecutorService thread pools, TCP socket handling, and an LRU cache for response caching.
 
-## Features
+## Features:
 
 - **Multithreading**: Fixed-size thread pool via ExecutorService (default 100 threads)
 - **High Concurrency**: Handles 1M+ concurrent requests through efficient socket management
