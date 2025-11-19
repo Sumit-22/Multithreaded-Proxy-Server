@@ -9,8 +9,6 @@
 A lightweight multithreaded HTTP server written entirely in Java.  
 It includes a custom HTTP parser, routing system, LRU cache, rate limiter, metrics, and multithreaded request handling.
 
----
-
 ## 🚀 Features
 
 - Custom HTTP/1.1 request parsing  
@@ -21,7 +19,7 @@ It includes a custom HTTP parser, routing system, LRU cache, rate limiter, metri
 - Internal metrics tracking  
 - Clean, modular architecture  
 
----
+```
 
 ## 📦 Project Structure
 
