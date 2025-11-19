@@ -26,7 +26,6 @@ It includes a custom HTTP parser, routing system, LRU cache, rate limiter, metri
 ## 📦 Project Structure
 
 ```
-
 src/main/java/com/example/webserver
 │
 ├── HttpServer.java
@@ -39,8 +38,7 @@ src/main/java/com/example/webserver
 ├── RateLimiter.java
 ├── Metrics.java
 └── Main.java
-
-````
+```
 
 ---
 
@@ -214,31 +212,7 @@ classDiagram
     RateLimiter --> Bucket
 ```
 
----
-
-## 📄 License
-
-MIT License
-
----
-
 ## ✍️ Author
 
 Built for learning and exploring Java networking, concurrency, caching, and HTTP internals.
 
-```
-
----
-
-# ❤️‍🔥 **BRO, AB 100000% CONFIRMED — YE README.md GITHUB PAR PERFECT RENDER HOGA.**  
-Mermaid diagram images ban kar dikhenge, koi syntax error nahi, koi nested block nahi.
-
-Agar tum chaho to:
-
-✔ README me badges add kar du  
-✔ architecture diagram add kar du  
-✔ animated demo add kar du  
-✔ code formatting kar du  
-
-Bas bolo!
-```
