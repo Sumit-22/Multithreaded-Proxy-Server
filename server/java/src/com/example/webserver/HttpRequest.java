@@ -1,25 +1,35 @@
 package com.example.webserver;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public record HttpRequest(String method, String path, String version, Map<String, String> headers, byte[] body) {
+public record HttpRequest(
+        String method,
+        String path,
+        String version,
+        Map<String, String> headers,
+        byte[] body
+) {
+
+    private static final int MAX_HEADER_SIZE = 64 * 1024;
+    private static final int MAX_BODY_SIZE = 1 * 1024 * 1024; // 1 MB
 
     public static HttpRequest parse(InputStream in) throws IOException {
-        // Read raw headers until CRLF CRLF
-        byte[] headerBytes = readUntilDoubleCRLF(in);
+        byte[] headerBytes = readUntilHeaderEnd(in);
         if (headerBytes == null || headerBytes.length == 0) return null;
 
-        String headerStr = new String(headerBytes, java.nio.charset.StandardCharsets.US_ASCII);
-        String[] lines = headerStr.split("\r\n");
+        String headerStr = new String(headerBytes, StandardCharsets.US_ASCII);
+        String[] lines = headerStr.split("\r?\n");
         if (lines.length == 0) return null;
 
         String[] parts = lines[0].split(" ", 3);
         if (parts.length < 3) return null;
 
         String method = parts[0].trim();
-        String path = parts[1].trim();
+        String rawPath = parts[1].trim();
+        String path = decodePath(rawPath);
         String version = parts[2].trim();
 
         Map<String, String> headers = new LinkedHashMap<>();
@@ -28,48 +38,84 @@ public record HttpRequest(String method, String path, String version, Map<String
             if (line.isEmpty()) break;
             int idx = line.indexOf(':');
             if (idx > 0) {
-                String k = line.substring(0, idx).trim();
-                String v = line.substring(idx + 1).trim();
-                headers.put(k, v);
+                headers.put(
+                        line.substring(0, idx).trim(),
+                        line.substring(idx + 1).trim()
+                );
             }
         }
 
-        int len = 0;
-        if (headers.containsKey("Content-Length")) {
-            try {
-                len = Integer.parseInt(headers.get("Content-Length"));
-            } catch (NumberFormatException ignored) {}
+        // Reject chunked encoding (not supported)
+        if ("chunked".equalsIgnoreCase(headers.get("Transfer-Encoding"))) {
+            throw new IOException("Chunked transfer encoding not supported");
         }
 
-        byte[] body = new byte[0];
-        if (len > 0) {
-            // Read raw bytes for the body; do not use character readers
-            body = in.readNBytes(len);
+        int contentLength = parseContentLength(headers);
+        if (contentLength > MAX_BODY_SIZE) {
+            throw new IOException("Request body too large");
         }
+
+        byte[] body = readExactBytes(in, contentLength);
 
         return new HttpRequest(method, path, version, headers, body);
     }
 
-    private static byte[] readUntilDoubleCRLF(InputStream in) throws IOException {
-        java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream(1024);
-        int state = 0;
-        int b;
-        while ((b = in.read()) != -1) {
-            bos.write(b);
-            // detect \r\n\r\n
-            switch (state) {
-                case 0: state = (b == '\r') ? 1 : 0; break;
-                case 1: state = (b == '\n') ? 2 : 0; break;
-                case 2: state = (b == '\r') ? 3 : 0; break;
-                case 3:
-                    if (b == '\n') return bos.toByteArray();
-                    state = 0; break;
+    private static int parseContentLength(Map<String, String> headers) {
+        String v = headers.get("Content-Length");
+        if (v == null) return 0;
+        try {
+            return Integer.parseInt(v);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private static byte[] readExactBytes(InputStream in, int len) throws IOException {
+        if (len == 0) return new byte[0];
+
+        byte[] body = in.readNBytes(len);
+        if (body.length != len) {
+            throw new EOFException("Unexpected end of request body");
+        }
+        return body;
+    }
+
+    private static String decodePath(String path) {
+        try {
+            return URLDecoder.decode(path, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            return path;
+        }
+    }
+
+    private static byte[] readUntilHeaderEnd(InputStream in) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
+        int prev = -1;
+        int curr;
+        int newlineCount = 0;
+
+        while ((curr = in.read()) != -1) {
+            bos.write(curr);
+
+            if (curr == '\n') {
+                newlineCount++;
+                if (newlineCount == 2) {
+                    return bos.toByteArray();
+                }
+            } else if (curr != '\r') {
+                newlineCount = 0;
             }
-            // Safety: cap header size (e.g., 64KB) to avoid abuse
-            if (bos.size() > 64 * 1024) throw new IOException("Header too large");
+
+            if (bos.size() > MAX_HEADER_SIZE) {
+                throw new IOException("Header too large");
+            }
+
+            prev = curr;
         }
         return bos.toByteArray();
     }
 
-    public byte[] body() { return body; }
+    public byte[] body() {
+        return body.clone();
+    }
 }

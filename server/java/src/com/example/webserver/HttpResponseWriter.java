@@ -19,7 +19,14 @@ public class HttpResponseWriter {
         sb.append("Server: Java-MT-Server/1.0\r\n");
         sb.append("Connection: close\r\n");
         sb.append("Content-Length: ").append(body.length).append("\r\n");
-        resp.headers().forEach((k, v) -> sb.append(k).append(": ").append(v).append("\r\n"));
+        resp.headers().forEach((k, v) -> {
+             if (!k.equalsIgnoreCase("Content-Length")
+            && !k.equalsIgnoreCase("Connection")
+            && !k.equalsIgnoreCase("Date")
+            && !k.equalsIgnoreCase("Server")) {
+        sb.append(k).append(": ").append(v).append("\r\n");
+    }
+});
         sb.append("\r\n");
 
         out.write(sb.toString().getBytes(StandardCharsets.US_ASCII));

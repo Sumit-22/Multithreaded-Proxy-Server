@@ -13,6 +13,7 @@ public class HttpResponse {
     public HttpResponse(int status, String reason) {
         this.status = status;
         this.reason = reason;
+         headers.put("Connection", "close");
     }
 
     public int status() { return status; }
@@ -22,13 +23,15 @@ public class HttpResponse {
 
     public HttpResponse body(byte[] body) {
         this.body = body;
+        headers.put("Content-Length", String.valueOf(body.length));
         return this;
     }
 
     public static HttpResponse okText(String s) {
         HttpResponse r = new HttpResponse(200, "OK");
         r.headers.put("Content-Type", "text/plain; charset=utf-8");
-        r.body = s.getBytes(StandardCharsets.UTF_8);
+      //  r.body = s.getBytes(StandardCharsets.UTF_8);
+      r.body(s.getBytes(StandardCharsets.UTF_8));
         return r;
     }
 
@@ -45,12 +48,26 @@ public class HttpResponse {
         r.body = b;
         return r;
     }
-
+/* 
     public static HttpResponse notFound() {
         return badRequest(404, "Not Found");
-    }
+    }*/
 
-    public static HttpResponse badRequest(String msg) {
+    public static HttpResponse notFound() {
+        HttpResponse r = new HttpResponse(404, "Not Found");
+        r.headers.put("Content-Type", "text/plain; charset=utf-8");
+        r.body("Not Found".getBytes(StandardCharsets.UTF_8));
+        return r;
+}
+
+public static HttpResponse badRequest(int code, String msg) {
+    HttpResponse r = new HttpResponse(code, "Bad Request");
+    r.headers.put("Content-Type", "text/plain; charset=utf-8");
+    r.body(msg.getBytes(StandardCharsets.UTF_8));
+    return r;
+}
+
+ /*    public static HttpResponse badRequest(String msg) {
         return badRequest(400, msg);
     }
 
@@ -59,7 +76,7 @@ public class HttpResponse {
         r.headers.put("Content-Type", "text/plain; charset=utf-8");
         r.body = msg.getBytes(StandardCharsets.UTF_8);
         return r;
-    }
+    }*/
 
     public static HttpResponse tooManyRequests(String msg) {
         HttpResponse r = new HttpResponse(429, "Too Many Requests");

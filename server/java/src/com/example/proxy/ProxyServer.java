@@ -24,13 +24,25 @@ public class ProxyServer {
     public ProxyServer(int port, int threadPoolSize, int cacheSize) {
         this.port = port;
         this.threadPoolSize = threadPoolSize;
-        this.threadPool = Executors.newFixedThreadPool(threadPoolSize);
+        this.threadPool = new ThreadPoolExecutor(
+        threadPoolSize,
+        threadPoolSize,
+        0L,
+        TimeUnit.MILLISECONDS,
+        new ArrayBlockingQueue<>(threadPoolSize * 2),
+        new ThreadPoolExecutor.CallerRunsPolicy()
+);
+
         this.cache = new ProxyCache(cacheSize);
         this.metrics = new ProxyMetrics();
     }
 
     public void start() throws IOException {
-        serverSocket = new ServerSocket(port);
+       // serverSocket = new ServerSocket(port);
+       serverSocket = new ServerSocket();
+       serverSocket.setReuseAddress(true);
+       serverSocket.bind(new InetSocketAddress(port), 1024);
+
         running = true;
         logger.info("Proxy Server started on port " + port + " with thread pool size: " + threadPoolSize);
 

@@ -11,22 +11,41 @@ public class Router {
     private final Map<String, Handler> routes = new ConcurrentHashMap<>();
 
     private static String key(String method, String path) {
-        return method + " " + path;
+        String decodedPath = decodePath(path);
+        return normalizeMethod(method) + " " + normalizePath(decodedPath);
+
+    }
+    private static String decodePath(String path) {
+        return URLDecoder.decode(path, StandardCharsets.UTF_8);
+    }
+
+    private static String normalizeMethod(String method) {
+    return method.toUpperCase();
+}
+
+    private static String normalizePath(String path) {
+        if (path.length() > 1 && path.endsWith("/")) {
+            return path.substring(0, path.length() - 1);
+        }
+    return path;
     }
 
     public void get(String path, Handler h) { routes.put(key("GET", path), h); }
     public void post(String path, Handler h) { routes.put(key("POST", path), h); }
     public void put(String path, Handler h) { routes.put(key("PUT", path), h); }
     public void delete(String path, Handler h) { routes.put(key("DELETE", path), h); }
-
+    
     public HttpResponse handle(HttpRequest req) {
         try {
-            Handler h = routes.getOrDefault(key(req.method(), req.path()), null);
+            Handler h = routes.get(key(req.method(), req.path()));
             if (h == null) return HttpResponse.notFound();
             return h.handle(req);
+        } catch (HttpException e) {
+            return e.response();
         } catch (Exception e) {
             e.printStackTrace(System.err);
-            return HttpResponse.internalError("Unhandled error");
+            return HttpResponse.internalError("Unhandled server error");
         }
-    }
+    }   
+
 }

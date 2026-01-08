@@ -3,54 +3,87 @@ package com.example.webserver;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class LruCache<K, V> extends LinkedHashMap<K, V> {
+public class LruCache<K, V extends CacheEntry> {
+
     private final int maxSize;
-    private final long ttlMillis; // 0 means no TTL
+    private final long ttlNanos;
+
+    private final Map<K, V> map;
 
     public LruCache(int maxSize, long ttlMillis) {
-        super(16, 0.75f, true);
         this.maxSize = Math.max(1, maxSize);
-        this.ttlMillis = Math.max(0, ttlMillis);
+        this.ttlNanos = ttlMillis > 0
+                ? ttlMillis * 1_000_000L
+                : 0;
+
+        this.map = new LinkedHashMap<>(16, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+                return size() > LruCache.this.maxSize;
+            }
+        };
     }
 
-    public long getTtlMillis() { return ttlMillis; }
+    public synchronized V get(K key) {
+        V entry = map.get(key);
+        if (entry == null) return null;
 
-    @Override
-    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-        return size() > maxSize;
+        if (entry.isExpired()) {
+            map.remove(key);
+            return null;
+        }
+        return entry;
     }
 
-    @Override
-    public synchronized V get(Object key) {
-        return super.get(key);
+    public synchronized void put(K key, V value) {
+        map.put(key, value);
     }
 
-    @Override
-    public synchronized V put(K key, V value) {
-        return super.put(key, value);
+    public synchronized int size() {
+        return map.size();
+    }
+
+    public long getTtlMillis() {
+        return ttlNanos / 1_000_000L;
     }
 }
+public class CacheEntry {
 
-class CacheEntry {
     private final byte[] body;
-    private final Map<String, String> headers = new LinkedHashMap<>();
-    private final long expiresAt;
+    private final Map<String, String> headers;
+    private final long expiresAtNanos;
 
-    CacheEntry(byte[] body, long ttlMillis) {
-        this.body = body;
-        this.expiresAt = ttlMillis > 0 ? System.currentTimeMillis() + ttlMillis : Long.MAX_VALUE;
+    CacheEntry(byte[] body, Map<String, String> headers, long ttlMillis) {
+        this.body = body.clone();
+        this.headers = Collections.unmodifiableMap(
+                new LinkedHashMap<>(headers)
+        );
+
+        if (ttlMillis > 0) {
+            this.expiresAtNanos =
+                    System.nanoTime() + ttlMillis * 1_000_000L;
+        } else {
+            this.expiresAtNanos = Long.MAX_VALUE;
+        }
     }
 
     public static CacheEntry from(HttpResponse r, long ttlMillis) {
-        CacheEntry ce = new CacheEntry(r.body(), ttlMillis);
-        ce.headers.putAll(r.headers());
-        return ce;
+        return new CacheEntry(
+                r.body(),
+                r.headers(),
+                ttlMillis
+        );
     }
 
     public boolean isExpired() {
-        return System.currentTimeMillis() > expiresAt;
+        return System.nanoTime() > expiresAtNanos;
     }
 
-    public byte[] body() { return body; }
-    public Map<String, String> headers() { return headers; }
+    public byte[] body() {
+        return body.clone();
+    }
+
+    public Map<String, String> headers() {
+        return headers;
+    }
 }
