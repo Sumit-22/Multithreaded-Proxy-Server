@@ -3,6 +3,8 @@ package com.example.proxy;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.nio.charset.StandardCharsets;
+
 
 /**
  * Parses HTTP requests for proxy forwarding.
@@ -183,6 +185,30 @@ public void removeHopByHopHeaders() {
 
 public void addHeader(String k, String v) {
     headers.put(k, v);
+}
+private static byte[] readUntilDoubleCRLF(InputStream in) throws IOException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    int state = 0;
+    int b;
+
+    while ((b = in.read()) != -1) {
+        bos.write(b);
+
+        switch (state) {
+            case 0: state = (b == '\r') ? 1 : 0; break;
+            case 1: state = (b == '\n') ? 2 : 0; break;
+            case 2: state = (b == '\r') ? 3 : 0; break;
+            case 3:
+                if (b == '\n') return bos.toByteArray();
+                state = 0;
+                break;
+        }
+
+        if (bos.size() > 64 * 1024) {
+            throw new IOException("Header too large");
+        }
+    }
+    return bos.toByteArray();
 }
 
 }
