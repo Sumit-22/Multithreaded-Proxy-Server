@@ -57,9 +57,12 @@ public class ProxyHandler implements Runnable {
                 metrics.recordCacheLookup(cached != null);
 
             if (cached != null) {
+                System.out.println("CACHE HIT  -> " + cacheKey);
                 clientOut.write(cached);
                 clientOut.flush();
                 return;
+    }else {
+        System.out.println("CACHE MISS -> " + cacheKey);
     }
 }
 
@@ -112,7 +115,7 @@ public class ProxyHandler implements Runnable {
 
         } catch (SocketTimeoutException e) {
             metrics.incrementTimeouts();
-            logger.warning("Timeout handling request");
+            logger.fine("Client read timeout");
         } catch (IOException e) {
             metrics.incrementErrors();
             logger.log(Level.WARNING, "Proxy error", e);

@@ -122,21 +122,27 @@ public class ProxyMetrics {
         long req = requests.get();
         long lookups = cacheLookups.get();
         long hits = cacheHits.get();
-
+        long misses = lookups - hits;
         double hitRate =
                 lookups > 0 ? (100.0 * hits / lookups) : 0.0;
 
         long avgLatency =
                 req > 0 ? totalLatencyMs.get() / req : 0;
-
+         
+        System.out.println("\n======================================");
         System.out.println("\n=== PROXY SERVER METRICS ===");
         System.out.println("Connections Received : " + connectionsReceived.get());
         System.out.println("Requests             : " + req);
+        System.out.println("Cache Lookups        : " + lookups);
+        System.out.println("Cache Hits           : " + hits);
+        System.out.println("Cache Misses         : " + misses);
+        System.out.println("Cache Hit Rate       : " +
+                String.format("%.2f%%", hitRate));
         System.out.println("Bad Requests         : " + badRequests.get());
         System.out.println("Errors               : " + errors.get());
         System.out.println("Timeouts             : " + timeouts.get());
-        System.out.println("Cache Hit Rate       : " +
-                String.format("%.2f%%", hitRate));
         System.out.println("Average Latency      : " + avgLatency + " ms");
+        System.out.println("\n======================================");
+        
     }
 }

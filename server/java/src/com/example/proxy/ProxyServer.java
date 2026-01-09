@@ -86,6 +86,7 @@ public class ProxyServer {
             threadPool.shutdownNow();
             Thread.currentThread().interrupt();
         }
+         metrics.printMetrics();
         logger.info("Proxy Server stopped");
     }
 
