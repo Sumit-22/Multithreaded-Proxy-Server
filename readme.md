@@ -216,20 +216,14 @@ classDiagram
 
 ## 🎥 Demo Video
 
-📺 **Project Walkthrough & Live Demo**
-👉 *Add your video link here*:
+📺 **Project Walkthrough & Live Demo**  
+[▶️ Watch on YouTube](https://youtu.be/5PMmvyknhLw)
 
-```
-[Video](https://youtu.be/5PMmvyknhLw)
-```
+**Covers:**
+- Cache hit vs miss demo
+- Metrics output on Ctrl + C
+- Thread pool behavior under load
 
-*(Recommended content for video)*:
-
-* Cache hit vs miss demo
-* Metrics output on Ctrl + C
-* Thread pool behavior under load
-
----
 
 ## 🎯 What This Project Demonstrates (Interview Ready)
 
