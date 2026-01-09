@@ -1,5 +1,3 @@
----
-
 # Java Multithreaded Web Server
 ```
 A lightweight multithreaded HTTP server written entirely in Java.  
