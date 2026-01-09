@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.*;
 
 /**
  * Thread-safe metrics collector for proxy server performance monitoring.
- */
+ 
 public class ProxyMetrics {
     private final AtomicLong connectionsReceived = new AtomicLong(0);
     private final AtomicLong requestsProcessed = new AtomicLong(0);
@@ -66,5 +66,77 @@ public class ProxyMetrics {
         System.out.println("Errors: " + errors.get());
         System.out.println("Timeouts: " + timeouts.get());
         System.out.println("Average Latency: " + avgLatency + "ms");
+    }
+}
+*/
+import java.util.concurrent.atomic.AtomicLong;
+
+public class ProxyMetrics {
+
+    private final AtomicLong connectionsReceived = new AtomicLong();
+
+    private final AtomicLong requests = new AtomicLong();
+    private final AtomicLong badRequests = new AtomicLong();
+    private final AtomicLong errors = new AtomicLong();
+    private final AtomicLong timeouts = new AtomicLong();
+
+    private final AtomicLong cacheLookups = new AtomicLong();
+    private final AtomicLong cacheHits = new AtomicLong();
+
+    private final AtomicLong totalLatencyMs = new AtomicLong();
+
+    /* ---------- Counters ---------- */
+
+    public void incrementConnectionsReceived() {
+        connectionsReceived.incrementAndGet();
+    }
+
+    public void incrementRequests() {
+        requests.incrementAndGet();
+    }
+
+    public void incrementBadRequests() {
+        badRequests.incrementAndGet();
+    }
+
+    public void incrementErrors() {
+        errors.incrementAndGet();
+    }
+
+    public void incrementTimeouts() {
+        timeouts.incrementAndGet();
+    }
+
+    public void recordCacheLookup(boolean hit) {
+        cacheLookups.incrementAndGet();
+        if (hit) cacheHits.incrementAndGet();
+    }
+
+    public void recordLatency(long latencyMs) {
+        totalLatencyMs.addAndGet(latencyMs);
+    }
+
+    /* ---------- Snapshot ---------- */
+
+    public void printMetrics() {
+        long req = requests.get();
+        long lookups = cacheLookups.get();
+        long hits = cacheHits.get();
+
+        double hitRate =
+                lookups > 0 ? (100.0 * hits / lookups) : 0.0;
+
+        long avgLatency =
+                req > 0 ? totalLatencyMs.get() / req : 0;
+
+        System.out.println("\n=== PROXY SERVER METRICS ===");
+        System.out.println("Connections Received : " + connectionsReceived.get());
+        System.out.println("Requests             : " + req);
+        System.out.println("Bad Requests         : " + badRequests.get());
+        System.out.println("Errors               : " + errors.get());
+        System.out.println("Timeouts             : " + timeouts.get());
+        System.out.println("Cache Hit Rate       : " +
+                String.format("%.2f%%", hitRate));
+        System.out.println("Average Latency      : " + avgLatency + " ms");
     }
 }

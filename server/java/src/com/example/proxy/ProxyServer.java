@@ -37,26 +37,34 @@ public class ProxyServer {
         this.metrics = new ProxyMetrics();
     }
 
-    public void start() throws IOException {
-       // serverSocket = new ServerSocket(port);
-       serverSocket = new ServerSocket();
-       serverSocket.setReuseAddress(true);
-       serverSocket.bind(new InetSocketAddress(port), 1024);
+  public void start() throws IOException {
+      serverSocket = new ServerSocket();
+    serverSocket.setReuseAddress(true);
+    serverSocket.bind(new InetSocketAddress(port), 1024);
 
-        running = true;
-        logger.info("Proxy Server started on port " + port + " with thread pool size: " + threadPoolSize);
+    running = true;
+    logger.info("Proxy Server started on port " + port +
+                " with thread pool size: " + threadPoolSize);
 
-        // Accept connections in main thread
-        while (running) {
+    while (running) {
+        try {
+            Socket clientSocket = serverSocket.accept();
+            metrics.incrementConnectionsReceived();
+
             try {
-                Socket clientSocket = serverSocket.accept();
-                metrics.incrementConnectionsReceived();
-                threadPool.execute(new ProxyHandler(clientSocket, cache, metrics));
-            } catch (SocketException e) {
-                if (running) {
-                    logger.log(Level.WARNING, "Error accepting connection", e);
-                }
+                threadPool.execute(
+                    new ProxyHandler(clientSocket, cache, metrics)
+                );
+            } catch (RejectedExecutionException e) {
+                metrics.incrementErrors();
+                clientSocket.close();
+                logger.warning("Dropped connection due to overload");
             }
+
+        } catch (SocketException e) {
+              if (!running) break;
+              logger.log(Level.WARNING, "Error accepting connection", e);
+          }
         }
     }
 

@@ -168,5 +168,21 @@ public class HttpProxyRequest {
         sb.append(path);
         return sb.toString();
     }
+public void removeHopByHopHeaders() {
+    headers.keySet().removeIf(k ->
+            k.equalsIgnoreCase("Connection") ||
+            k.equalsIgnoreCase("Keep-Alive") ||
+            k.equalsIgnoreCase("Proxy-Authenticate") ||
+            k.equalsIgnoreCase("Proxy-Authorization") ||
+            k.equalsIgnoreCase("TE") ||
+            k.equalsIgnoreCase("Trailer") ||
+            k.equalsIgnoreCase("Transfer-Encoding") ||
+            k.equalsIgnoreCase("Upgrade")
+    );
+}
+
+public void addHeader(String k, String v) {
+    headers.put(k, v);
+}
 
 }
