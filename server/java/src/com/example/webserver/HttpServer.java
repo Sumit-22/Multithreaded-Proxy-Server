@@ -44,7 +44,7 @@ public class HttpServer {
         try (ServerSocket ss = new ServerSocket()) {
             this.serverSocket = ss;
             ss.setReuseAddress(true);
-            ss.bind(new InetSocketAddress(port));
+            ss.bind(new InetSocketAddress("0.0.0.0", port));
             while (running) {
                 try {
                     final Socket socket = ss.accept();
