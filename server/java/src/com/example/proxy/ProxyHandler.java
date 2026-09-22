@@ -68,13 +68,21 @@ public class ProxyHandler implements Runnable {
 
             // ---------- CONNECT TO TARGET ----------
             Socket target = new Socket();
-            target.connect(
-                    new InetSocketAddress(
-                            request.getHost(),
-                            request.getPort()
-                    ),
-                    CONNECT_TIMEOUT
-            );
+            try {
+                target.connect(
+                        new InetSocketAddress(
+                                request.getHost(),
+                                request.getPort()
+                        ),
+                        CONNECT_TIMEOUT
+                );
+            } catch (IOException e) {
+                metrics.incrementErrors();
+                logger.log(Level.WARNING, "Upstream connect failed for " + request.getUrl(), e);
+                sendBadGateway(clientOut, "Bad Gateway: origin not reachable");
+                target.close();
+                return;
+            }
             target.setSoTimeout(READ_TIMEOUT);
 
             InputStream targetIn = target.getInputStream();
@@ -94,14 +102,21 @@ public class ProxyHandler implements Runnable {
             int n;
             int total = 0;
 
-            while ((n = targetIn.read(buf)) != -1) {
-                clientOut.write(buf, 0, n);
+            try {
+                while ((n = targetIn.read(buf)) != -1) {
+                    clientOut.write(buf, 0, n);
 
-                if (cacheable && total < MAX_CACHE_SIZE) {
-                    cacheBuffer.write(buf, 0, n);
+                    if (cacheable && total < MAX_CACHE_SIZE) {
+                        cacheBuffer.write(buf, 0, n);
+                    }
+
+                    total += n;
                 }
-
-                total += n;
+            } catch (SocketTimeoutException e) {
+                metrics.incrementTimeouts();
+                logger.log(Level.WARNING, "Upstream read timeout for " + request.getUrl(), e);
+                sendGatewayTimeout(clientOut);
+                return;
             }
 
             clientOut.flush();
@@ -142,6 +157,28 @@ public class ProxyHandler implements Runnable {
                 "Connection: close\r\n\r\n" +
                 "CONNECT not supported"
         ).getBytes());
+        out.flush();
+    }
+
+    private void sendBadGateway(OutputStream out, String message) throws IOException {
+        byte[] body = message.getBytes();
+        out.write((
+                "HTTP/1.1 502 Bad Gateway\r\n" +
+                "Connection: close\r\n" +
+                "Content-Length: " + body.length + "\r\n\r\n"
+        ).getBytes());
+        out.write(body);
+        out.flush();
+    }
+
+    private void sendGatewayTimeout(OutputStream out) throws IOException {
+        byte[] body = "Gateway Timeout: upstream did not respond in time".getBytes();
+        out.write((
+                "HTTP/1.1 504 Gateway Timeout\r\n" +
+                "Connection: close\r\n" +
+                "Content-Length: " + body.length + "\r\n\r\n"
+        ).getBytes());
+        out.write(body);
         out.flush();
     }
 }

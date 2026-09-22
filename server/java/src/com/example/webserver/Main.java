@@ -9,9 +9,10 @@ public class Main {
         LruCache<String, CacheEntry> cache =
                 new LruCache<>(1024, 30_000);
 
-        // Rate limit: 50 req/s, burst up to 100 per key
+        // Rate limit: tuned for stress testing — 1000 req/s, burst up to 2000 per key
+        // Increase for heavier load; consider making configurable for production.
         RateLimiter rateLimiter =
-                new RateLimiter(50.0, 100.0);
+                new RateLimiter(1000.0, 2000.0);
 
         Metrics metrics = new Metrics();
 
@@ -37,14 +38,16 @@ public class Main {
                 HttpResponse.okBytes(ctx.body())
         );
 
+        // Register metrics endpoint before server starts
+        router.get("/metrics", ctx ->
+                HttpResponse.okJson(metrics.summary())
+        );
+
         HttpServer server =
                 new HttpServer(port, router, cache, rateLimiter, metrics);
 
         System.out.println("[server] Starting on port " + port);
         server.start();
-        router.get("/metrics", ctx ->
-                HttpResponse.okJson(metrics.summary())
-        );
     }
 
     private static int parsePort(String[] args) {

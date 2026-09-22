@@ -24,47 +24,50 @@ public class ProxyServer {
     public ProxyServer(int port, int threadPoolSize, int cacheSize) {
         this.port = port;
         this.threadPoolSize = threadPoolSize;
+
+        int queueCapacity = Math.max(256, threadPoolSize * 20);
         this.threadPool = new ThreadPoolExecutor(
-        threadPoolSize,
-        threadPoolSize,
-        0L,
-        TimeUnit.MILLISECONDS,
-        new ArrayBlockingQueue<>(threadPoolSize * 2),
-        new ThreadPoolExecutor.CallerRunsPolicy()
-);
+                threadPoolSize,
+                threadPoolSize,
+                30L,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(queueCapacity),
+                new ThreadPoolExecutor.CallerRunsPolicy()
+        );
 
         this.cache = new ProxyCache(cacheSize);
         this.metrics = new ProxyMetrics();
     }
 
-  public void start() throws IOException {
-      serverSocket = new ServerSocket();
-    serverSocket.setReuseAddress(true);
-    serverSocket.bind(new InetSocketAddress(port), 1024);
+    public void start() throws IOException {
+        serverSocket = new ServerSocket();
+        serverSocket.setReuseAddress(true);
+        int backlog = Math.max(1024, threadPoolSize * 10);
+        serverSocket.bind(new InetSocketAddress("0.0.0.0", port), backlog);
 
-    running = true;
-    logger.info("Proxy Server started on port " + port +
-                " with thread pool size: " + threadPoolSize);
+        running = true;
+        logger.info("Proxy Server started on port " + port +
+                " with thread pool size: " + threadPoolSize +
+                ", backlog: " + backlog + ", queue: " + Math.max(256, threadPoolSize * 20));
 
-    while (running) {
-        try {
-            Socket clientSocket = serverSocket.accept();
-            metrics.incrementConnectionsReceived();
-
+        while (running) {
             try {
-                threadPool.execute(
-                    new ProxyHandler(clientSocket, cache, metrics)
-                );
-            } catch (RejectedExecutionException e) {
-                metrics.incrementErrors();
-                clientSocket.close();
-                logger.warning("Dropped connection due to overload");
-            }
+                Socket clientSocket = serverSocket.accept();
+                metrics.incrementConnectionsReceived();
 
-        } catch (SocketException e) {
-              if (!running) break;
-              logger.log(Level.WARNING, "Error accepting connection", e);
-          }
+                try {
+                    threadPool.execute(
+                            new ProxyHandler(clientSocket, cache, metrics)
+                    );
+                } catch (RejectedExecutionException e) {
+                    metrics.incrementErrors();
+                    clientSocket.close();
+                    logger.warning("Dropped connection due to overload");
+                }
+            } catch (SocketException e) {
+                if (!running) break;
+                logger.log(Level.WARNING, "Error accepting connection", e);
+            }
         }
     }
 
